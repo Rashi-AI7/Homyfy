@@ -1,0 +1,149 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem 0;
+    }
+
+    .filter {
+        text-align: center;
+        margin-right: 2rem;
+        margin-top: 0.5rem;
+        opacity: 0.7;
+        cursor: pointer;
+        transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .filter:hover {
+        opacity: 1;
+        transform: translateY(-2px);
+    }
+
+    .filter.active {
+        opacity: 1;
+        border-bottom: 2px solid black;
+    }
+
+    .filter i {
+        font-size: 1.2rem;
+    }
+
+    .filter p {
+        font-size: 0.8rem;
+        margin: 0.3rem 0 0;
+    }
+
+    .tax-toggle {
+        border: 1px solid black;
+        border-radius: 1rem;
+        height: 3.5rem;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        margin-left: 2rem;
+        margin-top: 1rem;
+        white-space: nowrap;
+    }
+</style>
+
+<div class="filters">
+    <div class="filter" data-category="trending">
+        <div><i class="fa-solid fa-fire"></i></div>
+        <p>Trending</p>
+    </div>
+    <div class="filter" data-category="rooms">
+        <div><i class="fa-solid fa-bed"></i></div>
+        <p>Rooms</p>
+    </div>
+    <div class="filter" data-category="iconic-cities">
+        <div><i class="fa-solid fa-mountain-city"></i></div>
+        <p>Iconic Cities</p>
+    </div>
+    <div class="filter" data-category="mountains">
+        <div><i class="fa-solid fa-mountain"></i></div>
+        <p>Mountains</p>
+    </div>
+    <div class="filter" data-category="castles">
+        <div><i class="fa-brands fa-fort-awesome"></i></div>
+        <p>Castles</p>
+    </div>
+    <div class="filter" data-category="pools">
+        <div><i class="fa-solid fa-person-swimming"></i></div>
+        <p>Amazing Pools</p>
+    </div>
+    <div class="filter" data-category="camping">
+        <div><i class="fa-solid fa-campground"></i></div>
+        <p>Camping</p>
+    </div>
+    <div class="filter" data-category="farms">
+        <div><i class="fa-solid fa-cow"></i></div>
+        <p>Farms</p>
+    </div>
+    <div class="filter" data-category="arctic">
+        <div><i class="fa-solid fa-snowflake"></i></div>
+        <p>Arctic</p>
+    </div>
+
+    <div class="tax-toggle">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+            <label class="form-check-label" for="switchCheckDefault">Show prices including GST</label>
+        </div>
+    </div>
+</div>
+
+<div class="row row-cols-lg-4 row-cols-md-2 row-cols-sm-1 mt-3" id="listingsRow">
+    <% for (let listing of allListings) { %>
+        <a href="/listings/<%= listing._id %>" class="listing-link">
+            <div class="card mb-3 listing-card">
+                <img
+                    src="<%= listing.image && listing.image.url ? listing.image.url : '/images/no-listing-image.png' %>"
+                    class="card-img-top"
+                    alt="<%= listing.title %>"
+                    style="height: 20rem; object-fit: cover;"
+                >
+                <div class="card-body">
+                    <p class="card-text">
+                        <b><%= listing.title %><br/></b>
+                        <span class="price" data-price="<%= listing.price %>">
+                            ₹<%= listing.price.toLocaleString("en-IN") %>
+                        </span>
+                        /night
+                    </p>
+                </div>
+            </div>
+        </a>
+    <% } %>
+</div>
+
+<script>
+    const taxSwitch = document.getElementById("switchCheckDefault");
+    const GST_RATE = 1.18;
+
+    function renderPrices() {
+        const prices = document.querySelectorAll(".price");
+        const useGst = taxSwitch.checked;
+
+        prices.forEach(price => {
+            const basePrice = Number(price.dataset.price);
+            const displayPrice = useGst
+                ? Math.round(basePrice * GST_RATE)
+                : basePrice;
+
+            price.innerText = "₹" + displayPrice.toLocaleString("en-IN");
+        });
+
+        localStorage.setItem("showGst", useGst ? "1" : "0");
+    }
+
+    // Restore the user's last toggle state on page load
+    if (localStorage.getItem("showGst") === "1") {
+        taxSwitch.checked = true;
+    }
+
+    taxSwitch.addEventListener("change", renderPrices);
+    renderPrices();
+</script>
